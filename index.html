@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Yahoo OAuth Callback</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; }
+    code { background: #eee; padding: 0.2em 0.4em; }
+  </style>
+</head>
+<body>
+  <h1>Yahoo OAuth Callback</h1>
+  <p id="status">Waiting for OAuth response...</p>
+  <p><strong>Authorization Code:</strong> <code id="auth-code">–</code></p>
+  <p><strong>State:</strong> <code id="auth-state">–</code></p>
+
+  <!-- Yahoo FFB Teams Section -->
+  <div id="yahoo-ffb-teams"></div>
+  <script src="yahoo-ffb-teams.js"></script>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const state = params.get("state");
+
+    document.getElementById("auth-code").textContent = code || "Missing";
+    document.getElementById("auth-state").textContent = state || "Missing";
+
+    if (code) {
+      document.getElementById("status").textContent = "Authorization successful. Copy the code and paste it into your script.";
+    } else {
+      document.getElementById("status").textContent = "Authorization failed or incomplete.";
+    }
+  </script>
+</body>
+</html>
