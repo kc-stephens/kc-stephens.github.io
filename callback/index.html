@@ -53,13 +53,88 @@
     document.getElementById("error-description").textContent = errorDescription || "None";
 
     if (code) {
-      document.getElementById("status").textContent = "Authorization code received! This flow requires a backend server to exchange the code for an access token.";
+      document.getElementById("status").textContent = "Authorization code received! Exchanging for access token...";
       document.getElementById("status").className = "success";
+      
+      // Exchange code for access token using our serverless function
+      exchangeCodeForToken(code);
     } else if (error) {
       document.getElementById("status").textContent = "OAuth failed!";
       document.getElementById("status").className = "error";
     } else {
       document.getElementById("status").textContent = "No OAuth response detected.";
+    }
+
+    async function exchangeCodeForToken(code) {
+      try {
+        const response = await fetch('/api/oauth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            code: code,
+            redirect_uri: window.location.origin + "/callback/"
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Success! Now we can fetch teams
+          document.getElementById("status").textContent = "Access token received! Fetching teams...";
+          fetchAndShowTeamsWithToken(data.access_token);
+        } else {
+          document.getElementById("status").textContent = "Token exchange failed: " + data.error;
+          document.getElementById("status").className = "error";
+        }
+      } catch (error) {
+        document.getElementById("status").textContent = "Error exchanging code: " + error.message;
+        document.getElementById("status").className = "error";
+      }
+    }
+
+    async function fetchAndShowTeamsWithToken(accessToken) {
+      const LEAGUE_KEY = "399.l.175815";
+      const url = `https://fantasysports.yahooapis.com/fantasy/v2/league/${LEAGUE_KEY}/teams?format=json`;
+      
+      try {
+        const res = await fetch(url, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        const container = document.getElementById("yahoo-ffb-teams");
+        if (!container) return;
+
+        if (!res.ok) {
+          container.innerHTML = `<div>Error fetching teams: ${res.statusText}</div>`;
+          return;
+        }
+
+        const data = await res.json();
+        const teams = data.fantasy_content.league[1].teams;
+        const teamNames = [];
+
+        for (const teamId in teams) {
+          if (!isNaN(teamId)) {
+            const team = teams[teamId].team;
+            teamNames.push(team[0][2].name);
+          }
+        }
+
+        container.innerHTML = "<h2>Yahoo FFB Teams</h2>";
+        teamNames.forEach((name) => {
+          const div = document.createElement("div");
+          div.textContent = name;
+          container.appendChild(div);
+        });
+
+        document.getElementById("status").textContent = "Teams loaded successfully!";
+      } catch (e) {
+        document.getElementById("yahoo-ffb-teams").innerHTML = `<div>Could not parse teams: ${e}</div>`;
+      }
     }
   </script>
 </body>
