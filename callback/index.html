@@ -56,8 +56,15 @@
       document.getElementById("status").textContent = "Authorization code received! Exchanging for access token...";
       document.getElementById("status").className = "success";
       
-      // Exchange code for access token using our serverless function
-      exchangeCodeForToken(code);
+      // Check if we should test league keys
+      const testLeagueKeys = sessionStorage.getItem('testLeagueKeys');
+      if (testLeagueKeys === 'true') {
+        sessionStorage.removeItem('testLeagueKeys'); // Clear the flag
+        exchangeCodeAndTestLeagues(code);
+      } else {
+        // Exchange code for access token using our serverless function
+        exchangeCodeForToken(code);
+      }
     } else if (error) {
       document.getElementById("status").textContent = "OAuth failed!";
       document.getElementById("status").className = "error";
@@ -92,6 +99,96 @@
         document.getElementById("status").textContent = "Error exchanging code: " + error.message;
         document.getElementById("status").className = "error";
       }
+    }
+
+    async function exchangeCodeAndTestLeagues(code) {
+      try {
+        // Exchange code for access token
+        const response = await fetch('/api/oauth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            code: code,
+            redirect_uri: window.location.origin + "/callback/"
+          })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          document.getElementById("status").textContent = "Access token received! Testing league keys...";
+          testAllLeagueKeys(data.access_token);
+        } else {
+          document.getElementById("status").textContent = "Token exchange failed: " + data.error;
+          document.getElementById("status").className = "error";
+        }
+      } catch (error) {
+        document.getElementById("status").textContent = "Error exchanging code: " + error.message;
+        document.getElementById("status").className = "error";
+      }
+    }
+
+    async function testAllLeagueKeys(accessToken) {
+      const leagueKeys = [
+        '399.l.175815', // NFL 2024
+        '402.l.175815', // NFL 2023
+        '405.l.175815', // NFL 2022
+        '408.l.175815', // NFL 2021
+        '411.l.175815'  // NFL 2020
+      ];
+
+      const resultsDiv = document.getElementById("yahoo-ffb-teams");
+      resultsDiv.innerHTML = "<h2>Testing League Keys for League ID: 175815</h2>";
+
+      for (const leagueKey of leagueKeys) {
+        try {
+          const response = await fetch('/api/fetch-teams', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              access_token: accessToken,
+              league_key: leagueKey
+            })
+          });
+
+          const data = await response.json();
+          const div = document.createElement("div");
+          div.style.cssText = "border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 4px;";
+
+          if (response.ok) {
+            div.innerHTML = `
+              <h3>✅ ${leagueKey} - SUCCESS</h3>
+              <p><strong>League Name:</strong> ${data.league_name}</p>
+              <p><strong>Teams Found:</strong> ${data.teams.length}</p>
+              <p><strong>Teams:</strong> ${data.teams.join(', ')}</p>
+            `;
+            div.style.borderColor = "green";
+          } else {
+            div.innerHTML = `
+              <h3>❌ ${leagueKey} - FAILED</h3>
+              <p><strong>Error:</strong> ${data.error}</p>
+              <p><strong>Status:</strong> ${data.status}</p>
+            `;
+            div.style.borderColor = "red";
+          }
+
+          resultsDiv.appendChild(div);
+        } catch (error) {
+          const div = document.createElement("div");
+          div.style.cssText = "border: 1px solid red; padding: 10px; margin: 10px 0; border-radius: 4px;";
+          div.innerHTML = `
+            <h3>❌ ${leagueKey} - ERROR</h3>
+            <p><strong>Error:</strong> ${error.message}</p>
+          `;
+          resultsDiv.appendChild(div);
+        }
+      }
+
+      document.getElementById("status").textContent = "League key testing complete!";
     }
 
     async function fetchAndShowTeamsWithToken(accessToken) {

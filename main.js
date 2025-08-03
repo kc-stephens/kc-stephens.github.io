@@ -14,7 +14,7 @@ function initiateOAuth() {
 }
 
 function testLeagueKeys() {
-  const REDIRECT_URI = window.location.origin + "/test-league-keys/";
+  const REDIRECT_URI = window.location.origin + "/callback/";
   const CLIENT_ID = "dj0yJmk9Nmd4aExpNm1EWHVvJmQ9WVdrOVZsaHdRbGRRZG1NbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTUw";
   const authUrl = `https://api.login.yahoo.com/oauth2/request_auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code`;
   
@@ -23,6 +23,8 @@ function testLeagueKeys() {
   console.log("Full Auth URL:", authUrl);
   console.log("========================");
   
+  // Store a flag to indicate we want to test league keys
+  sessionStorage.setItem('testLeagueKeys', 'true');
   window.location = authUrl;
 }
 
