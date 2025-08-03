@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OAuth Test</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; }
+    .debug { background: #f5f5f5; padding: 1em; margin: 1em 0; border-radius: 4px; }
+    .button { background: #4285f4; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>OAuth Test Page</h1>
+  
+  <div class="debug">
+    <h3>Debug Information</h3>
+    <p><strong>Current URL:</strong> <span id="current-url"></span></p>
+    <p><strong>Redirect URI:</strong> <span id="redirect-uri"></span></p>
+    <p><strong>Client ID:</strong> <span id="client-id"></span></p>
+  </div>
+
+  <button class="button" onclick="testOAuth()">Test OAuth</button>
+  
+  <div id="results"></div>
+
+  <script>
+    // Display current info
+    document.getElementById("current-url").textContent = window.location.href;
+    document.getElementById("redirect-uri").textContent = window.location.origin + "/callback/";
+    document.getElementById("client-id").textContent = "dj0yJmk9Nmd4aExpNm1EWHVvJmQ9WVdrOVZsaHdRbGRRZG1NbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTUw";
+
+    function testOAuth() {
+      const REDIRECT_URI = window.location.origin + "/callback/";
+      const CLIENT_ID = "dj0yJmk9Nmd4aExpNm1EWHVvJmQ9WVdrOVZsaHdRbGRRZG1NbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTUw";
+      const authUrl = `https://api.login.yahoo.com/oauth2/request_auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=fspt-r`;
+      
+      console.log("=== OAuth Test Debug ===");
+      console.log("Redirect URI:", REDIRECT_URI);
+      console.log("Client ID:", CLIENT_ID);
+      console.log("Full Auth URL:", authUrl);
+      console.log("========================");
+      
+      document.getElementById("results").innerHTML = `
+        <div class="debug">
+          <h4>OAuth URL being sent:</h4>
+          <p><code>${authUrl}</code></p>
+          <p>Redirecting to Yahoo...</p>
+        </div>
+      `;
+      
+      window.location = authUrl;
+    }
+  </script>
+</body>
+</html> 
