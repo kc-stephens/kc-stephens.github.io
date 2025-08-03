@@ -16,7 +16,7 @@
   
   <div id="oauth-status">
     <p id="status">Processing OAuth response...</p>
-    <p><strong>Access Token:</strong> <code id="access-token">–</code></p>
+    <p><strong>Authorization Code:</strong> <code id="auth-code">–</code></p>
     <p><strong>Error:</strong> <code id="error">–</code></p>
     <p><strong>Error Description:</strong> <code id="error-description">–</code></p>
   </div>
@@ -26,7 +26,8 @@
     <h3>Debug Information</h3>
     <p><strong>Current URL:</strong> <code id="current-url"></code></p>
     <p><strong>Redirect URI:</strong> <code id="redirect-uri"></code></p>
-    <p><strong>URL Fragment:</strong> <code id="url-fragment"></code></p>
+    <p><strong>URL Parameters:</strong> <code id="url-params"></code></p>
+    <p><strong>Note:</strong> Using authorization code flow (response_type=code)</p>
   </div>
 
   <!-- Yahoo FFB Teams Section -->
@@ -38,21 +39,21 @@
     // Display debug information
     document.getElementById("current-url").textContent = window.location.href;
     document.getElementById("redirect-uri").textContent = window.location.origin + "/callback/";
-    document.getElementById("url-fragment").textContent = window.location.hash || "No fragment";
+    document.getElementById("url-params").textContent = window.location.search || "No parameters";
 
-    // Parse URL fragment for OAuth response
-    const fragment = new URLSearchParams(window.location.hash.slice(1));
-    const accessToken = fragment.get("access_token");
-    const error = fragment.get("error");
-    const errorDescription = fragment.get("error_description");
+    // Parse URL parameters for OAuth response (authorization code flow)
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const error = params.get("error");
+    const errorDescription = params.get("error_description");
 
     // Display OAuth results
-    document.getElementById("access-token").textContent = accessToken ? "Present (hidden for security)" : "Missing";
+    document.getElementById("auth-code").textContent = code ? "Present (hidden for security)" : "Missing";
     document.getElementById("error").textContent = error || "None";
     document.getElementById("error-description").textContent = errorDescription || "None";
 
-    if (accessToken) {
-      document.getElementById("status").textContent = "OAuth successful! Access token received.";
+    if (code) {
+      document.getElementById("status").textContent = "Authorization code received! This flow requires a backend server to exchange the code for an access token.";
       document.getElementById("status").className = "success";
     } else if (error) {
       document.getElementById("status").textContent = "OAuth failed!";

@@ -2,7 +2,7 @@
 function initiateOAuth() {
   const REDIRECT_URI = window.location.origin + "/callback/";
   const CLIENT_ID = "dj0yJmk9Nmd4aExpNm1EWHVvJmQ9WVdrOVZsaHdRbGRRZG1NbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTUw";
-  const authUrl = `https://api.login.yahoo.com/oauth2/request_auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=fantasy`;
+  const authUrl = `https://api.login.yahoo.com/oauth2/request_auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=fantasy`;
   
   console.log("=== OAuth Debug Info ===");
   console.log("Redirect URI:", REDIRECT_URI);
