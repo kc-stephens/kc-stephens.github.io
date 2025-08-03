@@ -2,34 +2,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Yahoo OAuth Callback</title>
+  <title>Yahoo Fantasy Football Teams</title>
   <style>
-    body { font-family: sans-serif; padding: 2em; }
-    code { background: #eee; padding: 0.2em 0.4em; }
+    body { font-family: sans-serif; padding: 2em; max-width: 800px; margin: 0 auto; }
+    .button { 
+      background: #4285f4; 
+      color: white; 
+      padding: 12px 24px; 
+      border: none; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      font-size: 16px;
+      margin: 1em 0;
+    }
+    .button:hover { background: #3367d6; }
+    .info { background: #f5f5f5; padding: 1em; margin: 1em 0; border-radius: 4px; }
   </style>
 </head>
 <body>
-  <h1>Yahoo OAuth Callback</h1>
-  <p id="status">Waiting for OAuth response...</p>
-  <p><strong>Authorization Code:</strong> <code id="auth-code">–</code></p>
-  <p><strong>State:</strong> <code id="auth-state">–</code></p>
+  <h1>Yahoo Fantasy Football Teams</h1>
+  
+  <div class="info">
+    <h3>About This App</h3>
+    <p>This application fetches and displays teams from your Yahoo Fantasy Football league.</p>
+    <p>Click the button below to authenticate with Yahoo and view your league teams.</p>
+  </div>
+
+  <button class="button" onclick="initiateOAuth()">Connect to Yahoo Fantasy</button>
 
   <!-- Yahoo FFB Teams Section -->
   <div id="yahoo-ffb-teams"></div>
+  
   <script src="yahoo-ffb-teams.js"></script>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const state = params.get("state");
+    function initiateOAuth() {
+      const REDIRECT_URI = window.location.origin + "/callback/";
+      const CLIENT_ID = "dj0yJmk9Nmd4aExpNm1EWHVvJmQ9WVdrOVZsaHdRbGRRZG1NbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTUw";
+      const authUrl = `https://api.login.yahoo.com/oauth2/request_auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=fantasy`;
+      window.location = authUrl;
+    }
 
-    document.getElementById("auth-code").textContent = code || "Missing";
-    document.getElementById("auth-state").textContent = state || "Missing";
-
-    if (code) {
-      document.getElementById("status").textContent = "Authorization successful. Copy the code and paste it into your script.";
-    } else {
-      document.getElementById("status").textContent = "Authorization failed or incomplete.";
+    // Only try to fetch teams if we have an access token (e.g., if user came back from callback)
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = fragment.get("access_token");
+    
+    if (accessToken) {
+      // User has returned with an access token, try to fetch teams
+      fetchAndShowTeams();
     }
   </script>
 </body>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Yahoo OAuth Callback</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; }
+    code { background: #eee; padding: 0.2em 0.4em; }
+    .success { color: green; }
+    .error { color: red; }
+    .info { background: #f5f5f5; padding: 1em; margin: 1em 0; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Yahoo OAuth Callback</h1>
+  
+  <div id="oauth-status">
+    <p id="status">Processing OAuth response...</p>
+    <p><strong>Access Token:</strong> <code id="access-token">–</code></p>
+    <p><strong>Error:</strong> <code id="error">–</code></p>
+    <p><strong>Error Description:</strong> <code id="error-description">–</code></p>
+  </div>
+
+  <!-- Debug Information -->
+  <div class="info">
+    <h3>Debug Information</h3>
+    <p><strong>Current URL:</strong> <code id="current-url"></code></p>
+    <p><strong>Redirect URI:</strong> <code id="redirect-uri"></code></p>
+    <p><strong>URL Fragment:</strong> <code id="url-fragment"></code></p>
+  </div>
+
+  <!-- Yahoo FFB Teams Section -->
+  <div id="yahoo-ffb-teams"></div>
+  
+  <script src="../yahoo-ffb-teams.js"></script>
+
+  <script>
+    // Display debug information
+    document.getElementById("current-url").textContent = window.location.href;
+    document.getElementById("redirect-uri").textContent = window.location.origin + "/callback/";
+    document.getElementById("url-fragment").textContent = window.location.hash || "No fragment";
+
+    // Parse URL fragment for OAuth response
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = fragment.get("access_token");
+    const error = fragment.get("error");
+    const errorDescription = fragment.get("error_description");
+
+    // Display OAuth results
+    document.getElementById("access-token").textContent = accessToken ? "Present (hidden for security)" : "Missing";
+    document.getElementById("error").textContent = error || "None";
+    document.getElementById("error-description").textContent = errorDescription || "None";
+
+    if (accessToken) {
+      document.getElementById("status").textContent = "OAuth successful! Access token received.";
+      document.getElementById("status").className = "success";
+    } else if (error) {
+      document.getElementById("status").textContent = "OAuth failed!";
+      document.getElementById("status").className = "error";
+    } else {
+      document.getElementById("status").textContent = "No OAuth response detected.";
+    }
+  </script>
+</body>
+</html> 
