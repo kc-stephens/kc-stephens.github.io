@@ -26,15 +26,24 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ 
         error: 'Failed to fetch teams from Yahoo API',
         status: response.status,
-        statusText: response.statusText
+        statusText: response.statusText,
+        url: url
       });
     }
 
     const data = await response.json();
     
-    // Parse teams from the response
+    // Parse teams and league info from the response
     const teams = data.fantasy_content.league[1].teams;
     const teamNames = [];
+    let leagueName = 'Unknown League';
+
+    // Get league name
+    try {
+      leagueName = data.fantasy_content.league[0][2].name;
+    } catch (e) {
+      console.error('Could not parse league name:', e);
+    }
 
     for (const teamId in teams) {
       if (!isNaN(teamId)) {
@@ -45,6 +54,8 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       teams: teamNames,
+      league_name: leagueName,
+      league_key: league_key || '399.l.175815',
       raw_data: data // Include raw data for debugging
     });
 

@@ -117,7 +117,8 @@
         }
 
         // Display teams
-        container.innerHTML = "<h2>Yahoo FFB Teams</h2>";
+        container.innerHTML = `<h2>Teams in ${data.league_name}</h2>`;
+        container.innerHTML += `<p><strong>League Key:</strong> ${data.league_key}</p>`;
         data.teams.forEach((name) => {
           const div = document.createElement("div");
           div.textContent = name;

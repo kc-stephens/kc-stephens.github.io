@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>League Debug</title>
+  <style>
+    body { font-family: sans-serif; padding: 2em; }
+    .debug { background: #f5f5f5; padding: 1em; margin: 1em 0; border-radius: 4px; }
+    .button { background: #4285f4; color: white; padding: 12px 24px; border: none; border-radius: 4px; cursor: pointer; }
+    .league-info { border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 4px; }
+    .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>League Debug Page</h1>
+  
+  <div class="debug">
+    <h3>Instructions</h3>
+    <p>1. Click "Connect to Yahoo Fantasy" to authenticate</p>
+    <p>2. After authorization, you'll see your actual leagues</p>
+    <p>3. Use the correct league key in your app</p>
+  </div>
+
+  <button class="button" onclick="initiateOAuth()">Connect to Yahoo Fantasy</button>
+  
+  <div id="results"></div>
+  
+  <div class="test-section">
+    <h3>Test Different League Keys</h3>
+    <p>Your league URL is: <code>https://football.fantasysports.yahoo.com/f1/175815</code></p>
+    <p>Possible league keys to try:</p>
+    <ul>
+      <li><code>399.l.175815</code> (NFL 2024)</li>
+      <li><code>402.l.175815</code> (NFL 2023)</li>
+      <li><code>405.l.175815</code> (NFL 2022)</li>
+    </ul>
+  </div>
+  
+  <script>
+    function initiateOAuth() {
+      const REDIRECT_URI = window.location.origin + "/debug-callback/";
+      const CLIENT_ID = "dj0yJmk9Nmd4aExpNm1EWHVvJmQ9WVdrOVZsaHdRbGRRZG1NbWNHbzlNQT09JnM9Y29uc3VtZXJzZWNyZXQmc3Y9MCZ4PTUw";
+      const authUrl = `https://api.login.yahoo.com/oauth2/request_auth?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code`;
+      window.location = authUrl;
+    }
+
+    // Check if we have an access token from URL fragment
+    const fragment = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = fragment.get("access_token");
+    
+    if (accessToken) {
+      findLeagues(accessToken);
+    }
+
+    async function findLeagues(accessToken) {
+      try {
+        const response = await fetch('/api/find-league', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            access_token: accessToken
+          })
+        });
+
+        const data = await response.json();
+        const resultsDiv = document.getElementById("results");
+
+        if (!response.ok) {
+          resultsDiv.innerHTML = `<div class="debug">Error: ${data.error}</div>`;
+          return;
+        }
+
+        resultsDiv.innerHTML = "<h2>Your Leagues</h2>";
+        
+        if (data.leagues.length === 0) {
+          resultsDiv.innerHTML += "<p>No leagues found.</p>";
+        } else {
+          data.leagues.forEach((league, index) => {
+            const div = document.createElement("div");
+            div.className = "league-info";
+            div.innerHTML = `
+              <h3>League ${index + 1}</h3>
+              <p><strong>Name:</strong> ${league.name}</p>
+              <p><strong>League Key:</strong> <code>${league.league_key}</code></p>
+              <p><strong>Season:</strong> ${league.season}</p>
+              <p><strong>Game:</strong> ${league.game_name}</p>
+              <p><strong>Game Key:</strong> ${league.game_key}</p>
+            `;
+            resultsDiv.appendChild(div);
+          });
+        }
+
+      } catch (error) {
+        document.getElementById("results").innerHTML = `<div class="debug">Error: ${error.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html> 
