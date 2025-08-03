@@ -82,7 +82,7 @@
 
         if (response.ok) {
           // Success! Now we can fetch teams
-          document.getElementById("status").textContent = "Access token received! Fetching leagues...";
+          document.getElementById("status").textContent = "Access token received! Fetching teams...";
           fetchAndShowTeamsWithToken(data.access_token);
         } else {
           document.getElementById("status").textContent = "Token exchange failed: " + data.error;
@@ -96,55 +96,6 @@
 
     async function fetchAndShowTeamsWithToken(accessToken) {
       try {
-        // First, fetch user's leagues
-        const leaguesResponse = await fetch('/api/fetch-leagues', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            access_token: accessToken
-          })
-        });
-
-        const leaguesData = await leaguesResponse.json();
-        const container = document.getElementById("yahoo-ffb-teams");
-        if (!container) return;
-
-        if (!leaguesResponse.ok) {
-          container.innerHTML = `<div>Error fetching leagues: ${leaguesData.error}</div>`;
-          return;
-        }
-
-        // Display leagues for selection
-        container.innerHTML = "<h2>Your Yahoo Fantasy Leagues</h2>";
-        
-        if (leaguesData.leagues.length === 0) {
-          container.innerHTML += "<p>No leagues found.</p>";
-          return;
-        }
-
-        leaguesData.leagues.forEach((league, index) => {
-          const div = document.createElement("div");
-          div.style.cssText = "border: 1px solid #ccc; padding: 10px; margin: 10px 0; border-radius: 4px; cursor: pointer;";
-          div.innerHTML = `
-            <strong>${league.name}</strong><br>
-            Season: ${league.season}<br>
-            League Key: ${league.league_key}<br>
-            Game: ${league.game_name}
-          `;
-          div.onclick = () => fetchTeamsForLeague(accessToken, league.league_key, league.name);
-          container.appendChild(div);
-        });
-
-        document.getElementById("status").textContent = "Leagues loaded! Click on a league to view teams.";
-      } catch (e) {
-        document.getElementById("yahoo-ffb-teams").innerHTML = `<div>Could not fetch leagues: ${e.message}</div>`;
-      }
-    }
-
-    async function fetchTeamsForLeague(accessToken, leagueKey, leagueName) {
-      try {
         const response = await fetch('/api/fetch-teams', {
           method: 'POST',
           headers: {
@@ -152,7 +103,7 @@
           },
           body: JSON.stringify({
             access_token: accessToken,
-            league_key: leagueKey
+            league_key: '399.l.175815'
           })
         });
 
@@ -166,7 +117,7 @@
         }
 
         // Display teams
-        container.innerHTML = `<h2>Teams in ${leagueName}</h2>`;
+        container.innerHTML = "<h2>Yahoo FFB Teams</h2>";
         data.teams.forEach((name) => {
           const div = document.createElement("div");
           div.textContent = name;
