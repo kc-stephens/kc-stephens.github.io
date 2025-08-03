@@ -50,6 +50,12 @@
     if (accessToken) {
       // User has returned with an access token, try to fetch teams
       fetchAndShowTeams();
+    } else {
+      // Clear any error messages that might be displayed
+      const container = document.getElementById("yahoo-ffb-teams");
+      if (container) {
+        container.innerHTML = "";
+      }
     }
   </script>
 </body>

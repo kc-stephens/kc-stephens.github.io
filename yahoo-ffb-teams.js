@@ -82,4 +82,5 @@ async function fetchAndShowTeams() {
   }
 }
 
-window.addEventListener("DOMContentLoaded", fetchAndShowTeams);
+// Remove the automatic event listener that was causing OAuth redirect
+// window.addEventListener("DOMContentLoaded", fetchAndShowTeams);
